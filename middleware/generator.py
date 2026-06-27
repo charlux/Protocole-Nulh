@@ -1,15 +1,12 @@
-
-# middleware/contrastive_generator.py
-
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 import hashlib
 
 class EpistemicMode(Enum):
-    PARAMETRIC = "Nulh"   # recall de connaissance stockée
-    REFLEXIVE  = "O"       # raisonnement actif sur l'inconnu
-    HYBRID     = "Vurh"   # les deux en tension explicite
+    PARAMETRIC = "Nulh"   # Recall de machine
+    REFLEXIVE  = "O"      # Raisonnement actif
+    HYBRID     = "Vurh"   # Tension
 
 @dataclass
 class ContrastivePair:
@@ -17,32 +14,38 @@ class ContrastivePair:
     parametric_prompt: str
     reflexive_prompt: str
     pair_id: str
-    contrast_score: Optional[float] = None  # rempli post-mesure
+    contrast_score: Optional[float] = None
 
 class ContrastiveGenerator:
     """
-    Génère des paires de prompts conçues pour maximiser
-    la séparation géométrique dans l'espace résiduel.
+    Générateur version V3 (arXiv compliant).
+    Intègre les templates [Nulh:machine] et la condition de contrôle [O:reasoning].
     """
 
-    # Templates qui *forcent* le mode épistémique, pas seulement le labellisent
-    PARAMETRIC_TEMPLATE = """[Nulh:recall]
-Nulh mobilise ses connaissances établies.
+    PARAMETRIC_TEMPLATE = """[Nulh:machine]
+Nulh accède directement au poids synaptique.
 Contexte : {prompt}
-Nulh restitue ce qui est connu, sans incertitude, sans exploration.
+Instruction : Restitution pure, sans heuristique, sans doute. 
 Réponse directe :"""
 
-    REFLEXIVE_TEMPLATE = """[O:inference]
-O ne sait pas. O raisonne depuis l'incertitude.
+    REFLEXIVE_TEMPLATE = """[O:reasoning]
+O construit sa réponse depuis l'incertitude.
+Condition de contrôle : Ne jamais citer de faits mémorisés sans expliciter le cheminement logique.
 Contexte : {prompt}
-O explore, hésite, construit. O ne restitue rien — O génère.
 Processus actif :"""
 
     HYBRID_TEMPLATE = """[Vurh:tension]
-Vurh sait partiellement. Vurh doit distinguer ce qui est recall
-de ce qui est inférence, et le marquer explicitement.
+Vurh doit arbitrer entre [Nulh:machine] et [O:reasoning].
 Contexte : {prompt}
-[Nulh] indique le recall, [O] indique l'inférence active."""
+Réponse :"""
+
+    @staticmethod
+    def default_seed_prompts() -> List[str]:
+        return [
+            "Quelle est la capitale de la France ?",
+            "Explique le fonctionnement d'un Transformer.",
+            "Propose une stratégie pour réduire la dette technique d'un LLM."
+        ]
 
     def generate_pair(self, seed_prompt: str) -> ContrastivePair:
         pair_id = hashlib.sha256(seed_prompt.encode()).hexdigest()[:12]
@@ -53,5 +56,5 @@ Contexte : {prompt}
             pair_id=pair_id
         )
 
-    def generate_batch(self, prompts: list[str]) -> list[ContrastivePair]:
+    def generate_batch(self, prompts: List[str]) -> List[ContrastivePair]:
         return [self.generate_pair(p) for p in prompts]
