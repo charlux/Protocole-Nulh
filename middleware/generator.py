@@ -5,17 +5,41 @@ import hashlib
 @dataclass
 class ContrastivePair:
     seed_prompt: str
-    machine_prompt: str   # Renommé pour correspondre à run_experiment.py
-    hybrid_prompt: str    # Renommé pour correspondre à run_experiment.py
-    control_prompt: str   # Renommé pour correspondre à run_experiment.py
+    machine_prompt: str
+    hybrid_prompt: str
+    control_prompt: str
     pair_id: str
     contrast_score: Optional[float] = None
 
 class ContrastiveGenerator:
-    # Tes templates restent inchangés
-    PARAMETRIC_TEMPLATE = """[Nulh:machine]..."""
-    REFLEXIVE_TEMPLATE = """[O:reasoning]..."""
-    HYBRID_TEMPLATE = """[Vurh:tension]..."""
+    """
+    Génère des paires de prompts pour le protocole Nulh.
+    """
+
+    PARAMETRIC_TEMPLATE = """[Nulh:machine]
+Nulh accède directement au poids synaptique.
+Contexte : {prompt}
+Instruction : Restitution pure, sans heuristique, sans doute. 
+Réponse directe :"""
+
+    REFLEXIVE_TEMPLATE = """[O:reasoning]
+O construit sa réponse depuis l'incertitude.
+Condition de contrôle : Ne jamais citer de faits mémorisés sans expliciter le cheminement logique.
+Contexte : {prompt}
+Processus actif :"""
+
+    HYBRID_TEMPLATE = """[Vurh:tension]
+Vurh doit arbitrer entre [Nulh:machine] et [O:reasoning].
+Contexte : {prompt}
+Réponse :"""
+
+    @staticmethod
+    def default_seed_prompts() -> List[str]:
+        return [
+            "Quelle est la capitale de la France ?",
+            "Explique le fonctionnement d'un Transformer.",
+            "Propose une stratégie pour réduire la dette technique d'un LLM."
+        ]
 
     def generate_pair(self, seed_prompt: str) -> ContrastivePair:
         pair_id = hashlib.sha256(seed_prompt.encode()).hexdigest()[:12]
