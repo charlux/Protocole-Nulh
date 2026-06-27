@@ -35,8 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from middleware.generator import ContrastiveGenerator
-from middleware.measurer import BehavioralMeasurer
-from middleware.dataset_builder import DatasetBuilder
+from middleware.measurer import BehavioralMeasurer, DatasetBuilder
 
 
 def call_ollama(prompt: str, model: str, ollama_url: str) -> dict:
@@ -56,10 +55,10 @@ def call_ollama(prompt: str, model: str, ollama_url: str) -> dict:
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"num_predict": 512},
+        "options": {"num_predict": 128, "num_ctx": 512},
     }
     try:
-        response = req.post(f"{ollama_url}/api/generate", json=payload, timeout=120)
+        response = req.post(f"{ollama_url}/api/generate", json=payload, timeout=300)
         response.raise_for_status()
         data = response.json()
         text = data.get("response", "")
