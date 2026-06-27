@@ -1,0 +1,18 @@
+# Nulh Protocol Testbed — Dependencies
+
+# API backends (au moins un requis)
+anthropic>=0.25.0
+openai>=1.12.0          # optionnel, pour logprobs réels
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Analyse des résultats (optionnel mais recommandé)
+numpy>=1.26.0
+pandas>=2.2.0
+matplotlib>=3.8.0
+scikit-learn>=1.4.0     # pour les probing classifiers (phase 2)
+
+# Local model probing (phase 2 — modèles locaux uniquement)
+# transformer-lens>=1.14.0   # décommenter pour TransformerLens
+# torch>=2.2.0               # requis par TransformerLens
