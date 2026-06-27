@@ -10,10 +10,11 @@ class DatasetBuilder:
     L'objectif est la qualité du signal, pas le volume.
     """
 
-    def __init__(self, output_dir: str, contrast_threshold: float = 0.3):
+    def __init__(self, output_dir: str, threshold: float = 0.3):
+        # On renomme 'contrast_threshold' en 'threshold' pour correspondre à l'appel dans run_experiment.py
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.contrast_threshold = contrast_threshold
+        self.contrast_threshold = threshold 
         self.buffer: list[dict] = []
         self.rejected_count = 0
 
